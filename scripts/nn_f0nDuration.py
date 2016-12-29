@@ -36,11 +36,8 @@ class ANN:
 	    return self.output_dimensions    	
 
     def get_units_of_output_layer(self):
-	    return units_in_layer[self.output_layer]
+	    return self.units_in_layer[self.output_layer]
 
-	#def units_in_layer[self, layer_num]:
-	#    return self.weights[layer_num]    
-	    
     def get_total_layers(self):
 	    return self.total_layers    
 	    
@@ -60,16 +57,6 @@ class ANN:
 	    self.previous_MSE = mse
 
  
-    def initialize_delays(self):
-        k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions]   
-        
-        self.weights_delay = [numpy.random.randn(y, x)
-                        for x, y in zip(k[:-1], k[1:])]  
-   
-        #self.inputs_delay = [ numpy.random.randn(y,1) for y in k[1:]]
-        self.outputs_delay  = [numpy.random.randn(y, 1) for y in k[1:]]
-        self.input_set = 0
-
     def initialize_weights_nielson(self):
   
         k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions] 
@@ -390,7 +377,7 @@ class ANN:
                 self.update_mini_batch(mini_batch, eta)        ######################
             print "Epoch: " + str(j)
             print "Test Error:"
-            self.flag_test = 1
+            self.flag_test = 0
             self.compute_error_test(test_data)
             print "Training Error:"
             self.compute_error_test(training_data)
@@ -407,24 +394,11 @@ class ANN:
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         
-        w_backup = self.weights
-        b_backup = self.biases
         self.weights = [w-(eta/len(mini_batch))*nw
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
-	#print "Updated Weights"
-	#print "Printing a sample"
-	#print self.weights[-1]
-	#print '\n'
 	
-	'''
-	if np.isnan(self.biases[0]):
-	  self.weights = w_backup
-	  self.biases = b_backup
-	  print "Weights were updated to NAN"
-	  sys.exit(0)
-        '''	
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
         count = 0
@@ -459,8 +433,6 @@ class ANN:
             activations.append(a)
             count = count + 1
             
-            
-        #print "I think the output is :" + str(a)
         delta = self.cost_derivative(y,activations[-1]) * self.activation(zs[-1],count-1,1) 
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
@@ -480,20 +452,6 @@ class ANN:
 
     def cost_derivative(self, y, output_activations):
         return (output_activations - y) 
-
-    def sigmoid(self, z):
-       """The sigmoid function."""
-       return 1.0/(1.0+np.exp(-z))
-
-    def linear(z):
-        return z
-
-    def linear_prime(z):
-        return numpy.ones(len(z))        
-
-    def sigmoid_prime(self, z):
-        """Derivative of the sigmoid function."""
-        return self.sigmoid(z)*(1-self.sigmoid(z))
-        
+    
 
    
