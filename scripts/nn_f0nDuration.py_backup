@@ -1,0 +1,770 @@
+#!/usr/bin/python
+'''
+/*************************************************************************
+This file is implementaion of neural network class which contains the 
+necessary modules to train a neural network model.
+
+Author: Sai Krishna Rallabandi
+Affiliation: LTI, CMU. 
+Date of Last Modification: November 2016
+
+**************************************************************************/
+'''
+import sys, numpy, random
+import numpy as np
+
+class ANN:
+
+    def __init__(self):
+
+        self.input_dimensions = 0
+	self.output_dimensions = 0
+        self.output_layer = 1
+        self.total_layers = 2
+        self.eta = 0.01
+        self.previous_MSE = 0
+        self.A = 1.176
+        self.B = 2.0 / 3.0
+        self.Bb2A = self.B / (2.0 * self.A) 
+        self.units_in_layer = numpy.zeros(self.total_layers)   
+        self.param = 'param'
+
+    def get_input_dimensions(self):
+	    return self.input_dimensions
+    
+    def get_output_dimensions(self):
+	    return self.output_dimensions    	
+
+    def get_units_of_output_layer(self):
+	    return units_in_layer[self.output_layer]
+
+	#def units_in_layer[self, layer_num]:
+	#    return self.weights[layer_num]    
+	    
+    def get_total_layers(self):
+	    return self.total_layers    
+	    
+    def get_eta(self):
+	    return self.eta
+	    
+    def get_eta_layer(self, layer_num):
+	    return self.layerdetails_eta[layer_num]
+	    
+    def set_eta(self, eta_new):
+	    self.eta = eta_new 
+	    
+    def set_eta_layer(self, layer_num, eta_new):
+	    self.layerdetails_eta[layer_num] = eta_new 
+	    
+    def store_MSE(self, mse):
+	    self.previous_MSE = mse
+
+ 
+    def initialize_delays(self):
+        k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions]   
+        
+        self.weights_delay = [numpy.random.randn(y, x)
+                        for x, y in zip(k[:-1], k[1:])]  
+   
+        #self.inputs_delay = [ numpy.random.randn(y,1) for y in k[1:]]
+        self.outputs_delay  = [numpy.random.randn(y, 1) for y in k[1:]]
+        self.input_set = 0
+
+    def initialize_weights_nielson(self):
+  
+        k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions] 
+      
+        self.biases = [numpy.random.randn(y, 1) for y in k[1:]]
+        self.weights = [numpy.random.randn(y, x)
+                        for x, y in zip(k[:-1], k[1:])]
+        ##for w in self.weights:
+         #   print w.shape  
+        #for b in self.biases:
+        #    print b.shape       
+        #print self.biases[0]               
+        #k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions]   
+        #self.weights_delay = [numpy.random.randn(y, x)
+        #                for x, y in zip(k[:-1], k[1:])]  
+
+
+    
+    def activation(self, Sum, layer_num, derivative_flag):
+          
+            if self.type_of_layer[layer_num] == "L":
+                   if derivative_flag == 1:
+                       return 1.0
+                   else:
+                       return Sum
+
+            elif  self.type_of_layer[layer_num] == "N":
+                   if derivative_flag == 1:
+                           #print self.Bb2A * (self.A - Sum) * (self.A + Sum)
+                       return self.Bb2A * (self.A - Sum) * (self.A + Sum)
+                   else:    
+                       #print self.A * numpy.tanh(self.B*Sum) 
+                       return self.A * numpy.tanh(self.B*Sum) 
+            
+            elif self.type_of_layer[layer_num] == "S":
+                    if derivative_flag == 1:
+                       return self.B * local_output * ( 1- local_output)
+                    else:   
+                       #print 1.0 / ( 1 + A * exp(-(B*Sum))) 
+                       return 1.0 / ( 1 + A * exp(-(B*Sum))) 
+            else:
+                   print "I dont seem to find this activation function. Sorry :("
+                   sys.exit(0)
+
+    def activation_vector(self, Sum, layer_num, derivative_flag):
+          
+            if self.type_of_layer[layer_num] == "L":
+            	   if derivative_flag == 1:
+            	   	   return 1.0
+            	   else:
+                       return Sum
+
+            elif  self.type_of_layer[layer_num] == "N":
+            	   if derivative_flag == 1:
+            	   	   return Bb2A * (A - local_output) * (A + local_output)
+            	   else:	
+                       #print self.A * numpy.tanh(self.B*Sum) 
+                       return self.A * numpy.tanh(self.B*Sum) 
+            
+            elif self.type_of_layer[layer_num] == "S":
+            	    if derivative_flag == 1:
+            	   	   return B * local_output * ( 1- local_output)
+            	    else:	
+                       #print 1.0 / ( 1 + A * exp(-(B*Sum))) 
+            	       return 1.0 / ( 1 + self.A * np.exp(-(self.B*Sum))) 
+            else:
+                   print "I dont seem to find this activation function. Sorry :("
+                   sys.exit(0)
+
+
+
+
+
+    def configure_ANN(self, input_file, output_file):
+      
+        param_file = self.param
+        self.input_layer = -1
+        self.output_layer = 0
+        input_dimensions = 0
+       
+        
+        self.read_params(param_file)
+        print "Read the param file"
+        self.print_parameters()
+      
+        self.initialize_weights_nielson()
+        self.initialize_delays()
+        
+        self.input_pattern = numpy.loadtxt(input_file)
+        self.input_pattern = self.input_pattern[0:50]
+        self.output_pattern = numpy.loadtxt(output_file)
+        self.output_pattern = self.output_pattern[0:50]
+
+   
+
+    def train_ANN_batch(self, epochs):
+
+        for epoch in xrange(epochs):
+
+            input_batch  = self.input_pattern[0:50]
+            output_batch = self.output_pattern[0:50]
+            for i in range(0, len(input_batch)):
+                  pattern = input_batch[i]
+                  prediction = self.compute_output(pattern)
+                  desired_output = output_batch[i]
+                  #print prediction
+                  #print desired_output
+                  #print self.compute_error(desired_output, prediction)
+                  #output_batch.append(self.compute_output(pattern))
+                  self.compute_local_gradients_update(desired_output, prediction , self.eta)
+
+            if epoch % 10 == 1:
+                #print str(epoch) + ' ' + str(self.compute_error(self.output_pattern[1], self.compute_output(self.output_pattern[1])))
+                 print self.compute_error(desired_output, prediction)
+
+
+
+    def ANN(self, input_file, output_file):
+      
+        param_file = self.param
+        self.input_layer = -1
+        self.output_layer = 0
+        input_dimensions = 0
+       
+        self.epochs = 20
+        self.eta = 0.01
+        self.batch_size = 32
+
+        self.read_params(param_file)
+        #print "Read the param file"
+        #self.print_parameters()
+      
+       # self.initialize_weights()
+        self.initialize_weights_nielson()
+        #self.initialize_delays()
+        
+        self.input_pattern = numpy.loadtxt(input_file)
+        #self.input_pattern = self.input_pattern[0:50]
+        self.output_pattern = numpy.loadtxt(output_file)
+        #self.output_pattern = self.output_pattern[0:50]
+
+        #self.input_pattern = input_file
+        #self.output_pattern = output_file
+
+        from sklearn.cross_validation import train_test_split
+        Xtrain, Xtest, Ytrain, Ytest = train_test_split(self.input_pattern, self.output_pattern, train_size=0.83)
+
+        training_data = zip(Xtrain, Ytrain)
+        test_data = zip(Xtest, Ytest)
+
+        print test_data[-1]
+
+        
+
+        self.time = 0
+        given_input = self.input_pattern[0].reshape(self.input_dimensions, 1)
+        self.predicted_pattern = self.compute_output_new(given_input)
+        print "Prediction:"
+        print self.predicted_pattern.transpose()
+        
+        #self.predicted_pattern = self.feedforward_tdnn(given_input)
+        #self.predicted_pattern = self.feedforward(given_input)
+        print "Original:"
+        print self.output_pattern[0]
+
+        self.print_parameters()
+        self.SGD(training_data, test_data)
+
+        given_input = self.input_pattern[0].reshape(self.input_dimensions, 1)
+        self.predicted_pattern = self.compute_output_new(given_input)
+        print "Prediction:"
+        print self.predicted_pattern
+        
+        #self.predicted_pattern = self.feedforward_tdnn(given_input)
+        #self.predicted_pattern = self.feedforward(given_input)
+        print "Original:"
+        print self.output_pattern[0]
+
+
+
+
+   
+
+    def read_params(self, param_file):
+        f = open(param_file)
+        lines = f.readlines()
+        
+        self.total_layers = int(lines[0].split('\n')[0])
+        
+        self.input_layer = int(lines[1].split('\n')[0])
+        self.output_layer = int(lines[2].split('\n')[0])
+        
+        self.type_of_layers = lines[3].split('\n')[0]
+        self.number_of_layers = len(self.type_of_layers)
+        temp = lines[3].split('\n')[0]
+        #print temp
+        self.type_of_layer = []
+        for k in range(0, len(temp.split())):
+            #print "Type : "  + str(temp.split()[k])
+            self.type_of_layer.append(temp.split()[k])         
+
+        temp = lines[4].split('\n')[0]
+        #print temp
+        self.units_in_layer = []
+       
+        for k in range(0, len(temp.split())):
+            #print "Unit: "  + str(temp.split()[k])
+            self.units_in_layer.append(int(temp.split()[k]))
+        
+        self.input_dimensions = int(self.units_in_layer[int(self.input_layer)])
+        self.output_dimensions = int(self.units_in_layer[int(self.output_layer)])
+        self.output = numpy.zeros(self.output_dimensions)
+
+
+        self.eta = float(lines[5].split()[0])
+        #print self.eta
+        return
+
+    def print_parameters(self):
+        print "Input Dimensions: "  + str(self.input_dimensions) 
+        #print '\n'
+        print 'Input Layer: ' + str(self.input_layer)
+        #print '\n'
+        print "Output Dimensions: " + str(self.output_dimensions)
+        #print '\n'
+        print "Output Layer: " + str(self.output_layer)
+        #print '\n'
+        print "Learning Rate: " + str(self.eta)
+        #print '\n'
+        print "Type of Layers: "  + str(self.type_of_layers)
+        #print '\n'
+        print "Units in Layers: " + str(self.units_in_layer)
+        #print '\n'    
+        print "Shapes of weights: " 
+        for w in self.weights:
+            print w.shape
+
+        print "Shapes of biases: " 
+        for b in self.biases:
+            print b.shape    
+
+    def get_inout_dimensions(self):
+        return self.input_dimensions, self.output_dimensions  
+
+    def compute_output_vector(self, mini_batch):
+        self.outputs = []
+        batch_outputs = []
+        for a in mini_batch:
+            count = 0
+            #print "a: " + str(a)
+            a = a.reshape(self.input_dimensions,1)  
+            for b, w in zip(self.biases, self.weights):
+               Sum = np.dot(w, a)+b
+               a = self.activation_vector(Sum, count, 0)
+               self.outputs.append(a)
+               count = count + 1
+            batch_outputs.append(a)
+        return batch_outputs 
+
+
+    def compute_output_new(self, given_input):
+        count = 0
+        self.outputs = []
+        a = given_input.reshape(self.input_dimensions,1)
+        #print "Reshaped as "
+        #print a
+        for b, w in zip(self.biases, self.weights):
+         
+            Sum = np.dot(w, a)+b
+            a = self.activation_vector(Sum, count, 0)
+            #print "a after layer " + str(count) + ": " + str(a)
+            self.outputs.append(a)
+            count = count + 1
+
+        #print a    
+        return a
+
+    def evaluate(self, test_data):
+  
+        test_results = [(np.argmax(self.compute_output_new(x)), y)
+                        for (x, y) in test_data]
+     
+        print "      Error: " + str(float(sum(float(y-x) for (x,y) in test_results)/len(test_results)))            
+        return sum(int(x == y) for (x, y) in test_results)   
+
+
+    def compute_output(self,  input_pattern):
+        Sum = 0.0
+        layer_num = self.input_layer + 1
+        unit_num = 0
+        #starting_point_this_layer = self.Starting_Positions[layer_num]
+        iDim = 0
+        self.outputs = []
+
+        w = self.weights[0]
+        #print w
+        b = self.biases[0]
+        #print b
+
+        #print  "       Layer 0 "
+        output = numpy.zeros(self.units_in_layer[layer_num])
+ 
+        for unit_num in range(0, self.units_in_layer[layer_num]):
+          
+             if self.input_layer == -1:
+             	 iDim = self.input_dimensions
+             else:
+                 iDim = self.units_in_layer[input_layer]
+
+             for k in range(0,iDim):
+                 Sum = b[k]
+                 t = numpy.asarray(input_pattern)
+                 Sum = Sum + numpy.dot(t , w[unit_num]) 
+                 output[unit_num] = self.activation(Sum, layer_num, 0)
+        #print "Output from layer 0:"
+        #print output
+        self.outputs.append(output)
+        current_output = output
+
+        for layer_num in range(self.input_layer+2 , self.total_layers):
+             #print "    Layer " + str(layer_num)
+             previous_output = current_output
+             current_output = numpy.zeros(self.units_in_layer[layer_num])
+             w = self.weights[layer_num]
+             #print w.shape
+             b = self.biases[layer_num]
+             
+             for unit_num in range(0, self.units_in_layer[layer_num]):
+                 
+                 Sum = b[unit_num]
+
+                 for k in range(0, self.units_in_layer[layer_num-1]):
+                     #print k
+                     #print previous_output[k]
+                     ##print w[unit_num][k]
+                     #print '\n'
+
+                     Sum = Sum + previous_output[k] * w[unit_num][k]            	 
+                 current_output[unit_num] = self.activation(Sum, layer_num, 0)
+             #print "Output from layer " + str(layer_num) + ":"
+             #print current_output
+             self.outputs.append(current_output)
+             #print "Appended"
+        #print self.outputs
+        print "%%%%%%%%%%%"
+        for c in self.outputs:
+            print c.shape  
+            print c      
+        print "%%%%%%%%%%%"
+
+        return current_output       
+
+    def compute_error_minibatch(self, batch_desired_pattern, batch_predicted_pattern):
+    
+         error = 0
+         normalize_denominator = 0
+         self.error_at_output_layer = numpy.zeros(self.output_dimensions)
+         #starting_point_this_layer = Starting_Positions[output_layer]
+         
+         self.error_at_output_layer = batch_desired_pattern - batch_predicted_pattern
+         #print self.error_at_output_layer
+         error = sum( i*i for i in self.error_at_output_layer)
+         error = np.sum(self.error_at_output_layer**2)
+         #print error
+         normalize_denominator = normalize_denominator + sum( i*i for i in batch_desired_pattern)
+         normalize_denominator = normalize_denominator + np.sum(batch_desired_pattern**2)
+             
+
+         if  normalize_denominator == 0:
+           print "Denominator is 0. Something Wrong" 
+           sys.exit(0) 
+
+         error = error / normalize_denominator
+         MSE = error / len(batch_desired_pattern)
+         return MSE
+
+
+    def compute_error_vector(self, test_data):
+    
+        error = 0
+        normalize_denominator = 0
+        count = 0
+        for x,y in test_data:
+            count = count + 1
+            prediction = self.compute_output_new(x)
+            error = error + self.compute_error_minibatch(prediction, x)
+            #print error
+        print "Error: " + str(float(error/count))
+        #return error/count
+
+    def compute_error_test(self, test_data):
+    
+         
+
+        error = 0
+        normalize_denominator = 0
+
+        for x,y in test_data:
+
+            prediction = self.compute_output_new(x)
+            #print "I think the error is "
+            #print prediction
+            #print '\n'
+            error_single = prediction - y
+            squared_error = error_single * error_single
+            error = error + squared_error
+            #print error
+            normalize_denominator = normalize_denominator + y*y
+
+        if normalize_denominator == 0:
+             print "Denominator is 0"
+             sys.exit(0)
+
+        error = error / normalize_denominator    
+        MSE = error / len(test_data)   
+        print "MSE: " + str(MSE) 
+        #return MSE
+
+
+    def compute_error(self, desired_pattern, predicted_pattern):
+    
+         error = 0
+         normalize_denominator = 0
+         self.error_at_output_layer = numpy.zeros(self.output_dimensions)
+         #starting_point_this_layer = Starting_Positions[output_layer]
+
+         for unit_num in range(0, self.units_in_layer[self.output_layer]):
+              #print unit_num
+              #print desired_pattern
+              #print predicted_pattern
+              #print desired_pattern- predicted_pattern
+              self.error_at_output_layer = desired_pattern - predicted_pattern
+
+              error = error + (self.error_at_output_layer * self.error_at_output_layer) 
+              normalize_denominator = normalize_denominator + (desired_pattern* desired_pattern)             
+
+         if  normalize_denominator == 0:
+           print "Denominator is 0. Something Wrong" 
+           sys.exit(0) 
+
+         error = error / normalize_denominator
+         MSE = error
+         return MSE
+
+
+ 
+
+    def update_parameters_batch(self, batch_input, batch_output):
+
+         training_data = zip(batch_input, batch_output)
+         mini_batches = [training_data[k:k+self.batch_size] for k in xrange(0, len(batch_input), self.batch_size)]
+         for batch in mini_batches:
+           #print batch 
+           for i, o in batch:
+             i = i.reshape(self.input_dimensions, 1)
+             #print i
+             db,dw = self.backprop(i,o)
+             self.weights = self.weights - np.asarray(self.eta) * dw / len(batch)
+             self.biases = self.biases - np.asarray(self.eta) * db / len(batch)
+             print self.weights[-1]
+
+
+
+    def SGD(self, training_data, test_data):
+        
+        eta = self.eta
+        epochs = self.epochs
+        mini_batch_size = self.batch_size
+
+        if test_data: n_test = len(test_data)
+        n = len(training_data)
+
+        test_x = test_data[0]
+        test_y = test_data[1]
+        
+        for j in xrange(epochs):
+
+            if ( j > 10):
+                eta = eta / 2
+                print " I have halved the learning rate"
+            random.shuffle(training_data)
+            mini_batches = [ training_data[k:k+mini_batch_size] for k in xrange(0, n, mini_batch_size)]
+ 
+            for mini_batch in mini_batches:
+                self.update_mini_batch(mini_batch, eta)        ######################
+            print "Epoch: " + str(j)
+            #print self.error_at_output_layer
+
+            #if test_data and (j%10) == 1:
+            print "Test Error:"
+            self.compute_error_vector(test_data)
+            print "Training Error:"
+            self.compute_error_vector(training_data)
+            print '\n'
+    
+         
+    def update_mini_batch(self, mini_batch, eta):
+          
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+   
+        for x, y in mini_batch:
+            self.time = 0
+            #delta_nabla_b, delta_nabla_w = self.backprop_tdnn(x, y)
+            delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+        
+        self.weights = [w-(eta/len(mini_batch))*nw
+                        for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b-(eta/len(mini_batch))*nb
+                       for b, nb in zip(self.biases, nabla_b)]
+        #self.weights_delay = [w-(eta/len(mini_batch))*nw
+        #                for w, nw in zip(self.weights_delay, nabla_w)]               
+
+    def feedforward(self, a):
+        """Return the output of the network if ``a`` is input."""
+        count = 0
+        #print a.shape
+        a = a.reshape(self.input_dimensions,1)
+      
+        for b, w in zip(self.biases, self.weights):
+
+            z = np.dot(w,a) + b
+            a = self.activation(z, count,0)
+            #print a.shape
+            count = count + 1
+        return a    
+
+    def feedforward_tdnn(self, a):
+        """Return the output of the network if ``a`` is input."""
+        count = 0
+        print "Time: " + str(self.time)
+        #print a.shape
+        a = a.reshape(self.input_dimensions,1)
+        
+        if self.time == 0:
+            self.outputs_delay.append(a)
+            self.weights_delay = self.weights[0]
+      
+        for i in range(len(self.biases)):
+
+            b = self.biases[i]
+            w = self.weights[i]
+            wd = self.weights_delay[-1]
+            ad = self.outputs_delay[-1]
+         
+            print "Count : " + str(count)
+            print np.dot(w,a).shape
+            print np.dot(wd,ad).shape
+
+            z = np.dot(w,a) + np.dot(wd,ad) + b
+            a = self.activation(z, count,0)
+            #print a.shape
+            self.outputs_delay[count] = z
+            count = count + 1
+
+        self.time = 1    
+        return a        
+
+    def backprop(self, x, y):
+     
+        x = x.reshape(self.input_dimensions, 1)
+        #print y
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+       
+        # feedforward
+        a = x
+        activations = [x] # list to store all the activations, layer by layer
+        zs = [] # list to store all the z vectors, layer by layer
+   
+        count = 0
+        for b, w in zip(self.biases, self.weights):
+            #print "I am here"
+            #activation = activations[count]
+            z = np.dot(w, a)+b
+            #print 'z is'
+            #print z
+            zs.append(z)
+            #activation = self.sigmoid(z)
+            a = self.activation(z, count, 0)
+            #print a.shape
+            activations.append(a)
+            count = count + 1
+
+        
+        #print "Ouptut: " + str(a)
+      
+        delta = self.cost_derivative(activations[-1], y) * self.sigmoid_prime(zs[-1])       ####################
+        delta = self.compute_error_minibatch(activations[-1], y) * self.sigmoid_prime(zs[-1]) 
+
+        #self.error_at_output_layer = self.compute_error_minibatch(a, y)
+        #print self.error_at_output_layer
+
+        nabla_b[-1] = delta
+        #print "Delta: " + str(delta)
+        #print "Activations[-2]: " + str(activations[-2]) 
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+  
+
+        for l in xrange(2, self.total_layers):
+            z = zs[-l]
+            #sp = sigmoid_prime(z)
+            sp = self.activation(z,l,1)
+            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
+            nabla_b[-l] = delta
+            try:
+              nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+            except AttributeError:
+              nabla_w[-l] = np.dot(delta, activations[-l-1])  
+        return (nabla_b, nabla_w)
+   
+
+    def backprop_tdnn(self, x, y):
+     
+        x = x.reshape(self.input_dimensions, 1)
+        #print y
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+       
+        # feedforward
+        a = x
+        activations = [x] # list to store all the activations, layer by layer
+        zs = [] # list to store all the z vectors, layer by layer
+   
+        time = 0
+        count  = 0
+
+        if self.time == 0:
+            self.outputs_delay.append(a)
+            self.weights_delay = self.weights[0]
+      
+        for i in range(len(self.biases)):
+
+            b = self.biases[i]
+            w = self.weights[i]
+            wd = self.weights_delay[-1]
+            ad = self.outputs_delay[-1]
+         
+            print "Count : " + str(count)
+            print np.dot(w,a).shape
+            print np.dot(wd,ad).shape
+
+            z = np.dot(w,a) + np.dot(wd,ad) + b
+            a = self.activation(z, count,0)
+            activations.append(a)
+            #print a.shape
+            self.outputs_delay[count] = z
+            count = count + 1
+
+        self.time = 1    
+        #print "Ouptut: " + str(a)
+      
+        delta = self.cost_derivative(activations[-1], y) * self.sigmoid_prime(zs[-1])       ####################
+      
+
+        self.error_at_output_layer = self.compute_error(a, y)
+
+        nabla_b[-1] = delta
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+  
+
+        for l in xrange(2, self.total_layers):
+            z = zs[-l]
+            #sp = sigmoid_prime(z)
+            sp = self.activation(z,l,1)
+            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
+            nabla_b[-l] = delta
+            try:
+              nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+            except AttributeError:
+              nabla_w[-l] = np.dot(delta, activations[-l-1])  
+        return (nabla_b, nabla_w)
+   
+
+
+    def cost_derivative(self, output_activations, y):
+        """Return the vector of partial derivatives \partial C_x /
+        \partial a for the output activations."""
+        return (output_activations-y) * (output_activations - y)
+
+    def sigmoid(self, z):
+       """The sigmoid function."""
+       return 1.0/(1.0+np.exp(-z))
+
+    def linear(z):
+        return z
+
+    def linear_prime(z):
+        return numpy.ones(len(z))        
+
+    def sigmoid_prime(self, z):
+        """Derivative of the sigmoid function."""
+        return self.sigmoid(z)*(1-self.sigmoid(z))
+        
+
+   

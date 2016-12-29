@@ -1,0 +1,494 @@
+Loaded Data successfully
+ Training Data normalized
+Input Dimensions: 13
+Input Layer: 0
+Output Dimensions: 1
+Output Layer: 2
+Learning Rate: 0.1
+Type of Layers: N N L
+Units in Layers: [13, 15, 1]
+Shapes of weights: 
+(13, 13)
+(15, 13)
+(1, 15)
+Shapes of biases: 
+(13, 1)
+(15, 1)
+(1, 1)
+Prediction:
+[[-1.77727622]]
+Original:
+24.0
+Epoch: 0
+Test Error:
+MSE: [[ 0.00223247]]
+Training Error:
+MSE: [[ 0.00043545]]
+
+
+Epoch: 1
+Test Error:
+MSE: [[ 0.00155208]]
+Training Error:
+MSE: [[ 0.00027469]]
+
+
+Epoch: 2
+Test Error:
+MSE: [[ 0.00136615]]
+Training Error:
+MSE: [[ 0.00028227]]
+
+
+Epoch: 3
+Test Error:
+MSE: [[ 0.00164743]]
+Training Error:
+MSE: [[ 0.00030798]]
+
+
+Epoch: 4
+Test Error:
+MSE: [[ 0.00143684]]
+Training Error:
+MSE: [[ 0.00025664]]
+
+
+Epoch: 5
+Test Error:
+MSE: [[ 0.00169105]]
+Training Error:
+MSE: [[ 0.00032129]]
+
+
+Epoch: 6
+Test Error:
+MSE: [[ 0.00183278]]
+Training Error:
+MSE: [[ 0.00036819]]
+
+
+Epoch: 7
+Test Error:
+MSE: [[ 0.00170839]]
+Training Error:
+MSE: [[ 0.00031535]]
+
+
+Epoch: 8
+Test Error:
+MSE: [[ 0.00158871]]
+Training Error:
+MSE: [[ 0.00029297]]
+
+
+Epoch: 9
+Test Error:
+MSE: [[ 0.0017704]]
+Training Error:
+MSE: [[ 0.00034144]]
+
+
+Epoch: 10
+Test Error:
+MSE: [[ 0.00167509]]
+Training Error:
+MSE: [[ 0.00029675]]
+
+
+ I have halved the learning rate
+Epoch: 11
+Test Error:
+MSE: [[ 0.00175566]]
+Training Error:
+MSE: [[ 0.00030674]]
+
+
+ I have halved the learning rate
+Epoch: 12
+Test Error:
+MSE: [[ 0.00157496]]
+Training Error:
+MSE: [[ 0.00026903]]
+
+
+ I have halved the learning rate
+Epoch: 13
+Test Error:
+MSE: [[ 0.00151193]]
+Training Error:
+MSE: [[ 0.00025842]]
+
+
+ I have halved the learning rate
+Epoch: 14
+Test Error:
+MSE: [[ 0.00150861]]
+Training Error:
+MSE: [[ 0.00025772]]
+
+
+ I have halved the learning rate
+Epoch: 15
+Test Error:
+MSE: [[ 0.0015073]]
+Training Error:
+MSE: [[ 0.00025743]]
+
+
+ I have halved the learning rate
+Epoch: 16
+Test Error:
+MSE: [[ 0.00150656]]
+Training Error:
+MSE: [[ 0.00025734]]
+
+
+ I have halved the learning rate
+Epoch: 17
+Test Error:
+MSE: [[ 0.00150655]]
+Training Error:
+MSE: [[ 0.00025732]]
+
+
+ I have halved the learning rate
+Epoch: 18
+Test Error:
+MSE: [[ 0.00150657]]
+Training Error:
+MSE: [[ 0.00025728]]
+
+
+ I have halved the learning rate
+Epoch: 19
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025727]]
+
+
+ I have halved the learning rate
+Epoch: 20
+Test Error:
+MSE: [[ 0.00150662]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 21
+Test Error:
+MSE: [[ 0.00150662]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 22
+Test Error:
+MSE: [[ 0.00150662]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 23
+Test Error:
+MSE: [[ 0.00150662]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 24
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 25
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 26
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 27
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 28
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 29
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 30
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 31
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 32
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 33
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 34
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 35
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 36
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 37
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 38
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 39
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 40
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 41
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 42
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 43
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 44
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 45
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 46
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 47
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 48
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 49
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 50
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 51
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 52
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 53
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 54
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 55
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 56
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 57
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 58
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+ I have halved the learning rate
+Epoch: 59
+Test Error:
+MSE: [[ 0.00150661]]
+Training Error:
+MSE: [[ 0.00025726]]
+
+
+Prediction:
+[[ 25.04591664]]
+Original:
+24.0
