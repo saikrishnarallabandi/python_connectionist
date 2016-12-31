@@ -24,8 +24,8 @@ class ANN:
         self.eta = 0.01
         self.previous_MSE = 0
         self.A = 1.176
-        self.B = 2.0 / 3.0
-        self.Bb2A = self.B / (2.0 * self.A) 
+        self.B = 2.0 / 3.0  # 0.666
+        self.Bb2A = self.B / (2.0 * self.A)   ## 0.283
         self.units_in_layer = numpy.zeros(self.total_layers)   
         self.param = 'param'
 
@@ -60,7 +60,7 @@ class ANN:
     def initialize_weights_nielson(self):
   
         k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions] 
-      
+        #print "I am printing k " + str(k)
         self.biases = [numpy.random.randn(y, 1) for y in k[1:]]
         self.weights = [numpy.random.randn(y, x)
                         for x, y in zip(k[:-1], k[1:])]
@@ -119,29 +119,12 @@ class ANN:
                    sys.exit(0)
    
 
-    def train_ANN_batch(self, epochs):
-
-        for epoch in xrange(epochs):
-
-            input_batch  = self.input_pattern[0:50]
-            output_batch = self.output_pattern[0:50]
-            for i in range(0, len(input_batch)):
-                  pattern = input_batch[i]
-                  prediction = self.compute_output(pattern)
-                  desired_output = output_batch[i]
-                  self.compute_local_gradients_update(desired_output, prediction , self.eta)
-
-            if epoch % 10 == 1:
-                 print self.compute_error(desired_output, prediction)
-
-
-
     def ANN(self, input_file, output_file):
       
         param_file = self.param
         self.input_layer = -1
         self.output_layer = 0
-        input_dimensions = 0
+        self.input_dimensions = 0
         self.read_params(param_file)
         self.initialize_weights_nielson()
         self.input_pattern = numpy.loadtxt(input_file)
@@ -152,12 +135,13 @@ class ANN:
         Xtrain, Xtest, Ytrain, Ytest = train_test_split(self.input_pattern, self.output_pattern, train_size=0.83)
         training_data = zip(Xtrain, Ytrain)
         test_data = zip(Xtest, Ytest)
-        given_input = self.input_pattern[0].reshape(self.input_dimensions, 1)
+        #given_input = self.input_pattern[0].reshape(self.input_dimensions, 1)
+        given_input = Xtest[0].reshape(self.input_dimensions, 1)
         self.predicted_pattern = self.compute_output_new(given_input)
         print "Prediction:"
         print self.predicted_pattern.transpose()
         print "Original:"
-        print self.output_pattern[0]
+        print Ytest[0]
         
         self.SGD(training_data, test_data)
 
@@ -173,10 +157,11 @@ class ANN:
         f = open(param_file)
         lines = f.readlines()
         self.total_layers = int(lines[0].split('\n')[0])
-        self.input_layer = int(lines[1].split('\n')[0])
+        self.input_layer = int(lines[1].split('\n')[0].split()[0])
+        self.input_dimensions = int(lines[1].split('\n')[0].split()[1])
         self.output_layer = int(lines[2].split('\n')[0])
-        self.type_of_layers = lines[3].split('\n')[0]
-        self.number_of_layers = len(self.type_of_layers)
+        self.type_of_layers = lines[3].split('\n')[0].split()
+        self.number_of_layers = len(self.type_of_layers) + 1
         temp = lines[3].split('\n')[0]
         self.type_of_layer = []
         for k in range(0, len(temp.split())):
@@ -185,8 +170,7 @@ class ANN:
         self.units_in_layer = []
         for k in range(0, len(temp.split())):
             self.units_in_layer.append(int(temp.split()[k]))
-        self.input_dimensions = int(self.units_in_layer[int(self.input_layer)])
-        self.output_dimensions = int(self.units_in_layer[int(self.output_layer)])
+        self.output_dimensions = int(self.units_in_layer[int(self.output_layer) -1 ])
         self.output = numpy.zeros(self.output_dimensions)
         self.eta = float(lines[5].split()[0])
         self.epochs = int(lines[6].split()[0])
@@ -198,6 +182,7 @@ class ANN:
         print 'Input Layer: ' + str(self.input_layer)
         print "Output Dimensions: " + str(self.output_dimensions)
         print "Output Layer: " + str(self.output_layer)
+        print "Number of layers: " + str(self.number_of_layers)
         print "Learning Rate: " + str(self.eta)
         print "Type of Layers: "  + str(self.type_of_layers)
         print "Units in Layers: " + str(self.units_in_layer)
@@ -301,9 +286,9 @@ class ANN:
         for x,y in test_data:
             x = x.reshape(self.input_dimensions,1)
             prediction = self.compute_output_new(x)
-            if self.flag_test == 1:
+            #if self.flag_test == 1:
 	      #print test_data
-	      print str(y) + ' ' + str(prediction)
+	      #print str(y) + ' ' + str(prediction)
             error_single = prediction - y
             squared_error = error_single * error_single
             error = error + squared_error
@@ -377,7 +362,7 @@ class ANN:
                 self.update_mini_batch(mini_batch, eta)        ######################
             print "Epoch: " + str(j)
             print "Test Error:"
-            self.flag_test = 0
+            self.flag_test = 1
             self.compute_error_test(test_data)
             print "Training Error:"
             self.compute_error_test(training_data)
@@ -393,11 +378,21 @@ class ANN:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+        #print nabla_b
+        #print nabla_w
+        w_backup = self.weights
+        b_backup = self.biases
         
-        self.weights = [w-(eta/len(mini_batch))*nw
+        self.weights = [w-((eta/len(mini_batch))*nw)
                         for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb
+        self.biases = [b-((eta/len(mini_batch))*nb)
                        for b, nb in zip(self.biases, nabla_b)]
+	
+	#print "I have updated the parameters"
+	# Check if any is nan or inf and if yes, self.weights = w_backup ; self.biases = b_backup 
+	# Check and put flag to 1
+	#print self.weights[-1]
+	#print '\n'
 	
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -413,7 +408,8 @@ class ANN:
 
         return a    
 
-
+    # def ununpdate_mini_batch():
+      
     def backprop(self, x, y):
      
         x = x.reshape(self.input_dimensions, 1)
@@ -428,18 +424,29 @@ class ANN:
         count = 0
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, a)+b
+            #print "w: " + str(w)
+            #print "b: " + str(b)
+            #print "a: " + str(a)
+            #print "z: " + str(z)
             zs.append(z)
             a = self.activation(z, count, 0)
             activations.append(a)
             count = count + 1
-            
-        delta = self.cost_derivative(y,activations[-1]) * self.activation(zs[-1],count-1,1) 
+        
+        self.error_at_output_layer = self.cost_derivative(y,activations[-1])
+        delta = self.error_at_output_layer * self.activation(zs[-1],count-1,1) 
+        #print "Cost: " + str(self.error_at_output_layer)
+        #print "Input: " + str(self.activation(zs[-1],count-1,1)) + " for input: " + str(zs[-1])
+        #print "Delta: " + str(delta)
+        #print '\n'
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         
         for l in xrange(2, self.total_layers):
             z = zs[-l]
-            sp = self.activation(z,l,1)
+            #sp = self.activation(z,l,1)
+            # Modifying this on 31 December 2016 because l is index from last, not first
+            sp = self.activation(z, self.number_of_layers - l, 1)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             try:
@@ -451,6 +458,8 @@ class ANN:
         
 
     def cost_derivative(self, y, output_activations):
+        #print "y: " + str(y)
+        #print "Activation: " + str(output_activations)
         return (output_activations - y) 
     
 

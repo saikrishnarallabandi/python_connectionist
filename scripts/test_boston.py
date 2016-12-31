@@ -24,9 +24,9 @@ if flag_boston_prices == 1:
      X_std = xscaler.scale_
      X = xscaler.transform(X)
 
-     #min_max_scaler = preprocessing.MinMaxScaler()
-     #Y_train_minmax=min_max_scaler.fit_transform(Y)
-     #Y = Y_train_minmax 
+     min_max_scaler = preprocessing.MinMaxScaler()
+     Y_train_minmax=min_max_scaler.fit_transform(Y)
+     Y = Y_train_minmax + 0.00001
      print ' Training Data normalized'
 
      np.savetxt('../data/boston/boston.data',X, fmt='%1.3f')
