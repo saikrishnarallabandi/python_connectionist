@@ -26,8 +26,8 @@ if flag_arctic_duration == 1:
      np.savetxt('../data/arctic/arctic_train_output_normalized.vector',Y,fmt='%1.3f')
      
      NN = ANN()
-     NN.ANN('../data/arctic/arctic_train_input.vector', '../data/arctic/arctic_train_output_normalized.vector')
-    
+     #NN.ANN('../data/arctic/arctic_train_input.vector', '../data/arctic/arctic_train_output_normalized.vector')
+     NN.ANN('../data/arctic/arctic_train_input.vector', '../data/arctic/arctic_train_input.vector') 
      #training_data = zip(Xtrain,Ytrain)
      #test_data = zip(Xtest,Ytest)
      
