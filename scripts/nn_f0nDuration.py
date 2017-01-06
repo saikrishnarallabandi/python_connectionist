@@ -12,7 +12,7 @@ Date of Last Modification: November 2016
 '''
 import sys, numpy, random
 import numpy as np
-
+ 
 class ANN:
 
     def __init__(self):
@@ -61,11 +61,30 @@ class ANN:
   
         k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions] 
         #print "I am printing k " + str(k)
-        self.biases = [numpy.random.randn(y, 1) for y in k[1:]]
-        self.weights = [numpy.random.randn(y, x)
-                        for x, y in zip(k[:-1], k[1:])]
- 
+        max_weight = 3.0 / float(self.input_dimensions)
 
+        self.biases = [numpy.random.randn(y, 1)*0.01 for y in k[1:]]
+        self.weights = [numpy.random.randn(y,x)*0.01
+                        for x, y in zip(k[:-1], k[1:])]
+
+        #self.weights = 2 * max_weight * self.weights - max_weight
+        #self.biases = 2 * max_weight * self.biases - max_weight
+        '''
+        w_backup = self.weights
+        b_backup = self.biases
+        count = 0
+        for w,b in zip(self.weights, self.biases):
+ 
+               w = 2 * max_weight * w - max_weight
+               b = 2 * max_weight * b - max_weight
+               w_backup[count] = w
+               b_backup[count] = b
+               count = count + 1
+        self.weights = w_backup
+        self.biases = b_backup
+
+        print "Weights: " + str(w)
+        '''
     
     def activation(self, Sum, layer_num, derivative_flag):
           
@@ -97,20 +116,20 @@ class ANN:
           
             if self.type_of_layer[layer_num] == "L":
             	   if derivative_flag == 1:
-            	   	   return 1.0
+            	   	   return numpy.ones(len(Sum))
             	   else:
                        return Sum
 
             elif  self.type_of_layer[layer_num] == "N":
             	   if derivative_flag == 1:
-            	   	   return Bb2A * (A - local_output) * (A + local_output)
+            	   	   return self.Bb2A * (self.A - Sum) * (self.A + Sum)
             	   else:	
                        #print self.A * numpy.tanh(self.B*Sum) 
                        return self.A * numpy.tanh(self.B*Sum) 
             
             elif self.type_of_layer[layer_num] == "S":
             	    if derivative_flag == 1:
-            	   	   return B * local_output * ( 1- local_output)
+            	   	   return B * Sum * ( 1- Sum)
             	    else:	
                        #print 1.0 / ( 1 + A * exp(-(B*Sum))) 
             	       return 1.0 / ( 1 + self.A * np.exp(-(self.B*Sum))) 
@@ -136,12 +155,12 @@ class ANN:
         training_data = zip(Xtrain, Ytrain)
         test_data = zip(Xtest, Ytest)
         #given_input = self.input_pattern[0].reshape(self.input_dimensions, 1)
-        given_input = Xtest[0].reshape(self.input_dimensions, 1)
+        given_input = Xtest[2].reshape(self.input_dimensions, 1)
         self.predicted_pattern = self.compute_output_new(given_input)
         print "Prediction:"
         print self.predicted_pattern.transpose()
         print "Original:"
-        print Ytest[0]
+        print Ytest[2]
         
         self.SGD(training_data, test_data)
 
@@ -293,15 +312,17 @@ class ANN:
             squared_error = error_single * error_single
             error = error + squared_error
             normalize_denominator = normalize_denominator + y*y
-            
+#            print "printing normalie den", normalize_denominator            
         self.flag_test = 0
-        if normalize_denominator == 0:
-             print "Denominator is 0. I am exiting"
-             sys.exit()
-             print " I have exited"
+        #if normalize_denominator == 0:
+             #print "Normalizing"
+             #print "Denominator is 0. I am exiting"
+             #sys.exit()
+             #print " I have exited"
              
         error = error / normalize_denominator    
         MSE = error / len(test_data)  * 100 
+        MSE = np.mean(MSE)
         print "MSE: " + str(MSE) 
 
 
@@ -337,8 +358,8 @@ class ANN:
              db,dw = self.backprop(i,o)
              self.weights = self.weights - np.asarray(self.eta) * dw / len(batch)
              self.biases = self.biases - np.asarray(self.eta) * db / len(batch)
-             print "printing Weights"
-             print self.weights[-1]
+            # print "printing Weights"
+            # print self.weights[-1]
 
 
 
@@ -358,7 +379,10 @@ class ANN:
             random.shuffle(training_data)
             mini_batches = [ training_data[k:k+mini_batch_size] for k in xrange(0, n, mini_batch_size)]
  
+            count = 1
             for mini_batch in mini_batches:
+	        #print "Processing Minibatch " + str(count)
+	        count = count +1
                 self.update_mini_batch(mini_batch, eta)        ######################
             print "Epoch: " + str(j)
             print "Test Error:"
@@ -370,24 +394,25 @@ class ANN:
     
          
     def update_mini_batch(self, mini_batch, eta):
-          
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        k = [self.input_dimensions] + self.units_in_layer[:-1] + [self.output_dimensions]           
+        nabla_b =   [numpy.zeros(y) for y in k[1:]]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-   
+        #for b in nabla_b:
+	   #print "printign b.shape",  b.shape
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        #print nabla_b
-        #print nabla_w
+        #print "printing nabla_b", numpy.shape(nb),  numpy.shape(dnb)
+        
         w_backup = self.weights
         b_backup = self.biases
         
-        self.weights = [w-((eta/len(mini_batch))*nw)
+        self.weights = [w- ((eta/len(mini_batch))*nw)
                         for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-((eta/len(mini_batch))*nb)
+        self.biases = [b- ((eta/len(mini_batch))*nb).transpose()
                        for b, nb in zip(self.biases, nabla_b)]
-	
+        #print "am adding biases to", b.shape, nb.shape	
 	#print "I have updated the parameters"
 	# Check if any is nan or inf and if yes, self.weights = w_backup ; self.biases = b_backup 
 	# Check and put flag to 1
@@ -422,45 +447,40 @@ class ANN:
         zs = [] # list to store all the z vectors, layer by layer
    
         count = 0
+        #print "primtng inital w8", numpy.shape(self.weights)
         for b, w in zip(self.biases, self.weights):
-            z = np.dot(w, a)+b
-            #print "w: " + str(w)
-            #print "b: " + str(b)
-            #print "a: " + str(a)
-            #print "z: " + str(z)
+            z = np.dot(w, a)+b            
             zs.append(z)
-            a = self.activation(z, count, 0)
+            a = self.activation_vector(z, count, 0)
             activations.append(a)
             count = count + 1
         
         self.error_at_output_layer = self.cost_derivative(y,activations[-1])
-        delta = self.error_at_output_layer * self.activation(zs[-1],count-1,1) 
-        #print "Cost: " + str(self.error_at_output_layer)
-        #print "Input: " + str(self.activation(zs[-1],count-1,1)) + " for input: " + str(zs[-1])
-        #print "Delta: " + str(delta)
-        #print '\n'
+        delta = self.error_at_output_layer * self.activation_vector(zs[-1],count-1,1) 
+
         nabla_b[-1] = delta
-        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+        nabla_w[-1] = np.transpose(np.dot(activations[-2], delta))
         
         for l in xrange(2, self.total_layers):
             z = zs[-l]
-            #sp = self.activation(z,l,1)
-            # Modifying this on 31 December 2016 because l is index from last, not first
-            sp = self.activation(z, self.number_of_layers - l, 1)
-            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
+            sp = self.activation_vector(z, self.number_of_layers - l, 1)
+            sp = sp.reshape(1,self.units_in_layer[self.number_of_layers-l-1])
+            delta = np.dot(delta, self.weights[-l+1]) * sp
             nabla_b[-l] = delta
             try:
-              nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+              nabla_w[-l] = np.transpose(np.dot(activations[-l-1], delta) )
             except AttributeError:
-              nabla_w[-l] = np.dot(delta, activations[-l-1])  
+              nabla_w[-l] = np.transpose(np.dot(delta, activations[-l-1]) )
         return (nabla_b, nabla_w)
       
         
 
     def cost_derivative(self, y, output_activations):
-        #print "y: " + str(y)
-        #print "Activation: " + str(output_activations)
-        return (output_activations - y) 
+#        print "y: " + str(y)
+#        print "Activation: " + str(output_activations)
+ 
+       #print (numpy.transpose(output_activations) - y), numpy.shape(numpy.transpose(output_activations) - y)
+       return (numpy.transpose(output_activations) - y) 
     
 
    
