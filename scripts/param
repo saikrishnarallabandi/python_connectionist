@@ -1,19 +1,21 @@
 4
-0 13
+0 5
 3
 N N L
-40 20 1
-0.001
+10 10 1
+0.001 0.01 0.001
 20
-60
+120
 
 '''
- # Total number of layers 
+ # Total number of layers
  # Index of input layer and its dimensionality
- # Index of output layer 
+ # Index of output layer
  # Type of layers from input first hidden through output
- # Hidden Layer dimensions 
+ # Hidden Layer dimensions
 Learning Rate
 Epochs
 Batch Size
 '''
+
+

@@ -64,8 +64,12 @@ class ANN:
         max_weight = 3.0 / float(self.input_dimensions)
 
         self.biases = [numpy.random.randn(y, 1)*0.01 for y in k[1:]]
-        self.weights = [numpy.random.randn(y,x)*0.01
+        self.weights = [numpy.random.randn(y,x)/np.sqrt(self.input_dimensions)
                         for x, y in zip(k[:-1], k[1:])]
+
+        if self.load_flag == 1:
+           self.biases = np.load('best_biases.npy')
+           self.weights = np.load('best_weights.npy')
 
         #self.weights = 2 * max_weight * self.weights - max_weight
         #self.biases = 2 * max_weight * self.biases - max_weight
@@ -136,7 +140,21 @@ class ANN:
             else:
                    print "I dont seem to find this activation function. Sorry :("
                    sys.exit(0)
-   
+
+
+    def ANN_predict(self, input_file):
+
+        param_file = self.param
+        self.input_layer = -1
+        self.output_layer = 0
+        self.input_dimensions = 0
+        self.read_params(param_file)
+        self.weights = numpy.load('best_weights.npy')
+        self.biases = numpy.load('best_biases.npy')
+        self.input_pattern = numpy.loadtxt(input_file)
+        self.print_parameters()
+        y = self.compute_output_vector(self.input_pattern)    
+        numpy.savetxt('prediction.txt', y, fmt="%.5f")
 
     def ANN(self, input_file, output_file):
       
@@ -145,6 +163,7 @@ class ANN:
         self.output_layer = 0
         self.input_dimensions = 0
         self.read_params(param_file)
+        self.load_flag = 0
         self.initialize_weights_nielson()
         self.input_pattern = numpy.loadtxt(input_file)
         self.output_pattern = numpy.loadtxt(output_file)
@@ -163,7 +182,8 @@ class ANN:
         print Ytest[2]
         
         self.SGD(training_data, test_data)
-
+        numpy.save('best_weights', self.weights)
+        numpy.save('best_biases', self.biases)
         given_input = self.input_pattern[0].reshape(self.input_dimensions, 1)
         self.predicted_pattern = self.compute_output_new(given_input)
         print "Prediction:"
@@ -191,7 +211,11 @@ class ANN:
             self.units_in_layer.append(int(temp.split()[k]))
         self.output_dimensions = int(self.units_in_layer[int(self.output_layer) -1 ])
         self.output = numpy.zeros(self.output_dimensions)
-        self.eta = float(lines[5].split()[0])
+        temp = lines[5].split('\n')[0]        
+        self.eta = []
+        for k in range(0, len(temp.split())):
+           self.eta.append(float(temp.split()[k]))
+        #self.eta = float(lines[5].split()[0])
         self.epochs = int(lines[6].split()[0])
         self.batch_size = int(lines[7].split()[0])
         return
@@ -314,16 +338,16 @@ class ANN:
             normalize_denominator = normalize_denominator + y*y
 #            print "printing normalie den", normalize_denominator            
         self.flag_test = 0
-        #if normalize_denominator == 0:
+        if normalize_denominator == 0:
              #print "Normalizing"
-             #print "Denominator is 0. I am exiting"
-             #sys.exit()
+             print "Denominator is 0. I am exiting"
+             sys.exit()
              #print " I have exited"
              
-        error = error / normalize_denominator    
-        MSE = error / len(test_data)  * 100 
+        #error = error / normalize_denominator    
+        MSE = error / len(test_data) * 100
         MSE = np.mean(MSE)
-        print "MSE: " + str(MSE) 
+        print "MSE: " + str(MSE) # * 100) 
 
 
     def compute_error(self, desired_pattern, predicted_pattern):
@@ -374,7 +398,10 @@ class ANN:
         for j in xrange(epochs):
 
             if ( j > 10):
-                eta = eta / 2
+                new_eta = eta
+                eta = []
+                for k in new_eta:
+                    eta.append(k/2)
                 print " I have halved the learning rate"
             random.shuffle(training_data)
             mini_batches = [ training_data[k:k+mini_batch_size] for k in xrange(0, n, mini_batch_size)]
@@ -408,10 +435,14 @@ class ANN:
         w_backup = self.weights
         b_backup = self.biases
         
-        self.weights = [w- ((eta/len(mini_batch))*nw)
-                        for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b- ((eta/len(mini_batch))*nb).transpose()
-                       for b, nb in zip(self.biases, nabla_b)]
+        #self.weights = [w- ((eta/len(mini_batch))*nw)
+        #                for w, nw in zip(self.weights, nabla_w)]
+        #self.biases = [b- ((eta/len(mini_batch))*nb).transpose()
+        #              for b, nb in zip(self.biases, nabla_b)]
+
+        for i in range(len(self.weights)):
+             self.weights[i] = self.weights[i] - ((eta[i]/len(mini_batch))*nabla_w[i])
+             self.biases[i] = self.biases[i] - ((eta[i]/len(mini_batch))*nabla_b[i]).transpose()
         #print "am adding biases to", b.shape, nb.shape	
 	#print "I have updated the parameters"
 	# Check if any is nan or inf and if yes, self.weights = w_backup ; self.biases = b_backup 
