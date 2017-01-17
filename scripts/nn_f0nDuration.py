@@ -66,6 +66,9 @@ class ANN:
         self.biases = [numpy.random.randn(y, 1)*0.01 for y in k[1:]]
         self.weights = [numpy.random.randn(y,x)*0.01
                         for x, y in zip(k[:-1], k[1:])]
+	
+	self.previous_update_weights = [numpy.zeros(y,x)
+                        for x, y in zip(k[:-1], k[1:])]
 
         #self.weights = 2 * max_weight * self.weights - max_weight
         #self.biases = 2 * max_weight * self.biases - max_weight
@@ -194,6 +197,7 @@ class ANN:
         self.eta = float(lines[5].split()[0])
         self.epochs = int(lines[6].split()[0])
         self.batch_size = int(lines[7].split()[0])
+        self.momentum = float(lines[8].split()[0])
         return
 
     def print_parameters(self):
@@ -408,10 +412,12 @@ class ANN:
         w_backup = self.weights
         b_backup = self.biases
         
-        self.weights = [w- ((eta/len(mini_batch))*nw)
-                        for w, nw in zip(self.weights, nabla_w)]
+        self.weights = [w- ((eta/len(mini_batch))*nw - self.momentum*pw)
+                        for w, nw, pw in zip(self.weights, nabla_w, self.previous_update_weights)]
         self.biases = [b- ((eta/len(mini_batch))*nb).transpose()
                        for b, nb in zip(self.biases, nabla_b)]
+	
+	self.previous_update_weights = delta_nabla_w
         #print "am adding biases to", b.shape, nb.shape	
 	#print "I have updated the parameters"
 	# Check if any is nan or inf and if yes, self.weights = w_backup ; self.biases = b_backup 

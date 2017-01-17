@@ -6,7 +6,7 @@ N N L
 0.001
 20
 60
-
+0.9
 '''
  # Total number of layers 
  # Index of input layer and its dimensionality
